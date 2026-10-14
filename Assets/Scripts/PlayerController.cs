@@ -1,7 +1,9 @@
 
+
 using System.Collections;
 using System.Collections.Generic;
 using Command;
+using Observer;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -29,7 +31,10 @@ public class PlayerController : MonoBehaviour
     private Stack<ICommand> _redoStack;
     [HideInInspector] public Vector3 targetPosition;
     [HideInInspector] public Vector3 startPosition;
-    private bool _isReplaying = false;
+    private bool _isReplaying;
+    [SerializeField] private int coins;
+    [SerializeField] private int score;
+    [SerializeField] private int kills;
     
     private void Start()
     {
@@ -45,10 +50,32 @@ public class PlayerController : MonoBehaviour
         _redoStack = new Stack<ICommand>();
         // Set the target position to the current position of the player for replay
         startPosition = transform.position;
-        PlaybackIndicator.instance.ShowMessage("Recording", true);
+        targetPosition = transform.position;
+        if(PlaybackIndicator.instance != null)
+            PlaybackIndicator.instance.ShowMessage("Recording", true);
+        FindFirstObjectByType<Spawner>().ItemSpawned += OnItemSpawned;
         
     }
-
+    
+    private void OnDisable()
+    {
+        var spawner = FindFirstObjectByType<Spawner>();
+        if(spawner) spawner.ItemSpawned -= OnItemSpawned;
+        var obstacles = FindObjectsByType<Obstacle>(FindObjectsSortMode.None);
+        foreach (var obstacle in obstacles)
+        {
+          switch (obstacle.type)
+            {
+             case ObstacleType.Enemy:
+                  obstacle.OnObstacleHit -= EnemyWasHit;
+                  break;
+             case ObstacleType.Coin:
+                  obstacle.OnObstacleHit -= CoinWasCollected;
+                  break;
+            }
+        }
+    }
+    
     // Update is called once per frame
     private void Update()
     {
@@ -64,6 +91,30 @@ public class PlayerController : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * moveSpeed);
     }
 
+    private void CoinWasCollected(Obstacle obstacle)
+    {
+        coins++;
+        score += obstacle.value;
+    }
+    
+    private void EnemyWasHit(Obstacle obstacle)
+    {
+        kills++;
+        score += obstacle.value;
+    }
+
+    private void OnItemSpawned(Obstacle item)
+    {
+        switch (item.type)
+        {
+            case ObstacleType.Enemy:
+                item.OnObstacleHit += EnemyWasHit;
+                break;
+            case ObstacleType.Coin:
+                item.OnObstacleHit += CoinWasCollected;
+                break;
+        }
+    }
     private void Move(Vector3 direction)
     {
         transform.Translate(direction * moveDistance);
@@ -177,7 +228,7 @@ public class PlayerController : MonoBehaviour
         _isReplaying = false;
         PlaybackIndicator.instance.ShowMessage("Recording", true);
     }
-        
+    
     [ContextMenu("Swap Commands/ForwardBackward")]
     private void SwapForwardBackwardCommands()
     {
