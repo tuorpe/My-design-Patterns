@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     private ICommand _commandSpace;
     private ICommand _commandLast;
     private ICommand _commandNext;
+    private ICommand _commandEsc;
     
     private Rigidbody _rb;
     // Undo history stack
@@ -46,6 +47,7 @@ public class PlayerController : MonoBehaviour
         _commandSpace = new Command.JumpCommand(_rb, jumpForce, commandIndicator);
         _commandLast = new DoNothingCommand();
         _commandNext = new DoNothingCommand();
+        _commandEsc = new Command.QuitCommand();
         _undoStack = new Stack<ICommand>();
         _redoStack = new Stack<ICommand>();
         // Set the target position to the current position of the player for replay
@@ -197,6 +199,11 @@ public class PlayerController : MonoBehaviour
             {
                 keyboardIndicator?.ShowMessage("R pressed", .5f);
                 StartCoroutine(StartReplay());
+            }
+            
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                CallCommand(_commandEsc);
             }
         #endregion
     }

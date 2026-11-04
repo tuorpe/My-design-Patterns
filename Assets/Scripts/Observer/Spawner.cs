@@ -32,7 +32,7 @@ public class Spawner : MonoBehaviour
     {
         if (objectsToSpawn.Length == 0)
         {
-            Debug.LogWarning("No objects assigned to spawn.");
+            // Debug.LogWarning("No objects assigned to spawn.");
             return;
         }
         var spawnPosition = _spawnArea.center + new Vector3(
