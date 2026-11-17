@@ -5,7 +5,7 @@ namespace Command
         public void Execute()
         {
             // Quit the application
-            GameManager.Instance.OnReturnToMenu();
+            GameManager.Instance.ReturnToMenu();
         }
 
         public void Undo()

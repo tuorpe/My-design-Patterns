@@ -36,7 +36,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         SceneManager.LoadScene("ObserverScene");
     }
     
-    public void OnReturnToMenu()
+    public void ReturnToMenu()
     {
         AudioManager.Instance.PlayMenuMusic();
         SceneManager.LoadScene("MenuScene");

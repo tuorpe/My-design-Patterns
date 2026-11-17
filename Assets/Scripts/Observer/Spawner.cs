@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 using Observer;
 using Random = UnityEngine.Random;
 
@@ -12,6 +13,8 @@ public class Spawner : MonoBehaviour
     private BoxCollider _spawnArea;
     private float _spawnTimer;
     public event Action<Obstacle> ItemSpawned;
+    
+    private List<Obstacle> _objectsSpawnedInScene = new List<Obstacle>();
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
@@ -35,6 +38,9 @@ public class Spawner : MonoBehaviour
             // Debug.LogWarning("No objects assigned to spawn.");
             return;
         }
+        // Check if the maximum number of items in the scene has been reached
+        if(_objectsSpawnedInScene.Count >= numberOfObjectsToSpawn)
+            return;
         var spawnPosition = _spawnArea.center + new Vector3(
             Random.Range(_spawnArea.bounds.min.x, _spawnArea.bounds.max.x),
             Random.Range(_spawnArea.bounds.min.y, _spawnArea.bounds.max.y),
@@ -43,7 +49,15 @@ public class Spawner : MonoBehaviour
         // Get a random object from the array
         var randomObject = objectsToSpawn[Random.Range(0, objectsToSpawn.Length)];
         var newItem = Instantiate(randomObject, spawnPosition, Quaternion.identity, transform);
+        newItem.OnObstacleHit += OnObjectDestroyed;
+        _objectsSpawnedInScene.Add(newItem);
         // Notify subscribers that an item has been spawned
         ItemSpawned?.Invoke(newItem);
+    }
+    
+    private void OnObjectDestroyed(Obstacle item)
+    {
+        // Remove the item from the list of spawned objects when it is destroyed
+        _objectsSpawnedInScene.Remove(item);
     }
 }

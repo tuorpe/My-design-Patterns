@@ -1,3 +1,4 @@
+using State_Machine;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,13 +12,13 @@ public class SceneUILoader : MonoBehaviour
     {
         if (startButton)
         {
-            startButton.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnStartGame);
+            startButton.GetComponent<Button>().onClick.AddListener(GameManagerSM.Instance.StartGame);
             AddButtonHoverListener(startButton);
         }
 
         if (exitButton)
         {
-            exitButton.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnExitGame);
+            exitButton.GetComponent<Button>().onClick.AddListener(GameManagerSM.Instance.OnExitGame);
             AddButtonHoverListener(exitButton);
         }
     }
